@@ -25,7 +25,7 @@ var _pointsAttr = ['cpoints', 'points'];
 
 
 //internals
-var reg = /((?:^|\s))\((\x3f|\d*\.?\d+)(\))\s?/m, //parse regexp- accepts digits, decimals and '?', surrounded by ()
+var reg = /^\[(\d+)\|(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)\]\s*(.*)$/,
 	regC = /((?:^|\s))\[(\x3f|\d*\.?\d+)(\])\s?/m, //parse regexp- accepts digits, decimals and '?', surrounded by []
 	iconUrl = chrome.extension.getURL('images/storypoints-icon.png'),
 	pointsDoneUrl = chrome.extension.getURL('images/points-done.png');
@@ -179,7 +179,7 @@ function ListCard(el, identifier){
 
 				//only update title text and list totals once
 				if(!consumed) {
-					$title[0].childNodes[1].textContent = el._title = $.trim(el._title.replace(reg,'$1').replace(regC,'$1'));
+					$title[0].childNodes[1].textContent = el._title = $.trim(el._title.replace(reg,'$4').replace(regC,'$4'));
 					var list = $card.closest('.list');
 					if(list[0]) list[0].list.calc();
 				}
