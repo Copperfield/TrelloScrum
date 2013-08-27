@@ -17,7 +17,6 @@
 ** Samuel Gaus <https://github.com/gausie>
 **
 */
-
 //default story point picker sequence
 var _pointSeq = ['?', 0, .5, 1, 2, 3, 5, 8, 13, 21];
 //attributes representing points values for card
@@ -25,9 +24,10 @@ var _pointsAttr = ['cpoints', 'points'];
 
 
 //internals
-var reg = /^\[(\d+)\|(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)\]\s*(.*)$/,
-	regC = /((?:^|\s))\[(\x3f|\d*\.?\d+)(\])\s?/m, //parse regexp- accepts digits, decimals and '?', surrounded by []
+var reg = /^#(\d+(?:\.\d+)?).(\d+(?:\.\d+)?)º \((\d+(?:\.\d+)?),(\d+(?:\.\d+)?)\)\s*(.*)$/,
+	regC = /^#[\d]+.(\d+(?:\.\d+)?)º \((\d+(?:\.\d+)?),(\d+(?:\.\d+)?)\)\s*(.*)$/, //parse regexp- accepts digits, decimals and '?', surrounded by []
 	iconUrl = chrome.extension.getURL('images/storypoints-icon.png'),
+	hashIconUrl = chrome.extension.getURL('images/hashtag_icon.png'),
 	pointsDoneUrl = chrome.extension.getURL('images/points-done.png');
 
 function round(_val) {return (Math.floor(_val * 100) / 100)};
@@ -73,7 +73,7 @@ function computeTotal(){
 			$('#board .list-total .'+attr).each(function(){
 				score+=parseFloat(this.textContent)||0;
 			});
-			$total.append('<span class="'+attr+'">'+(round(score)||'')+'</span>');
+			$total.prepend('<span class="'+attr+'">'+(round(score)||'')+' </span>');
 		}
 	});
 };
@@ -120,7 +120,7 @@ function List(el){
 					if(!isNaN(Number(this.listCard[attr].points)))score+=Number(this.listCard[attr].points)
 				});
 				var scoreTruncated = round(score);
-				$total.append('<span class="'+attr+'">'+(scoreTruncated>0?scoreTruncated:'')+'</span>');
+				$total.prepend('<span class="'+attr+'">'+(scoreTruncated>0?scoreTruncated:'')+' </span>');
 				computeTotal();
 			}
 		});
@@ -154,7 +154,12 @@ function ListCard(el, identifier){
 		to2,
 		phref='',
 		$card=$(el),
-		$badge=$('<div class="badge badge-points point-count" style="background-image: url('+iconUrl+')"/>');
+		$badge=$('<div class="badge badge-points point-count" style="background-image: url('+iconUrl+')"/>'),
+		$badge_task=$badge.clone();
+		$badge_task
+			.css('background-image', 'url('+hashIconUrl+')')
+			.addClass('badge-points-task')
+			.removeClass('badge-points')
 
 	this.refresh=function(){
 		clearTimeout(to);
@@ -167,8 +172,9 @@ function ListCard(el, identifier){
 			if(href!=phref) {
 				phref = href;
 				parsed=title.match(regexp);
-				points=parsed?parsed[2]:-1;
+				points=parsed?parsed[3]:-1;
 			}
+
 			clearTimeout(to2);
 			to2 = setTimeout(function(){
 				$badge
@@ -177,9 +183,12 @@ function ListCard(el, identifier){
 					.attr({title: 'This card has '+that.points+ (consumed?' consumed':'')+' storypoint' + (that.points == 1 ? '.' : 's.')})
 					.prependTo($card.find('.badges'));
 
-				//only update title text and list totals once
 				if(!consumed) {
-					$title[0].childNodes[1].textContent = el._title = $.trim(el._title.replace(reg,'$4').replace(regC,'$4'));
+					$badge_task
+						.text(parsed[1]+'.'+parsed[2])
+						.prependTo($card.find('.badges'));
+
+					$title[0].childNodes[1].textContent = el._title = $.trim(el._title.replace(reg,'$5').replace(regC,'$5'));
 					var list = $card.closest('.list');
 					if(list[0]) list[0].list.calc();
 				}

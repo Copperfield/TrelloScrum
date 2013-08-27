@@ -12,6 +12,7 @@
 	"manifest_version" : 2,
     "icons": { "128": "trello-scrum-icon.png" },
     "web_accessible_resources": [
+	    "images/hashtag_icon.png",
 	    "images/storypoints-icon.png",
 	    "images/points-done.png"
     ]
